@@ -76,25 +76,35 @@ agent_executor = AgentExecutor(
 #     print(response['output'])
 #     print("\n")
 
-def converse(user_input, history):
-    # 1) Send user_input to the agent
-    agent_response = agent_executor.run(user_input)
-    
-    # 2) Append messages in the "role-content" format
+def converse(user_input, history, model_choice):
+    response = f"[{model_choice}] Response to: {user_input}"
     history.append({"role": "user", "content": user_input})
-    history.append({"role": "assistant", "content": str(agent_response)})
-    
-    # 3) Return a blank string for the input box and the updated list of messages
+    history.append({"role": "assistant", "content": response})
     return "", history
 
+def clear_history():
+    return []
+
 with gr.Blocks() as demo:
-    gr.Markdown("## SQL + ChatGPT Agent")
+    gr.Markdown("""
+    # 💬 AI SQL Agent Playground
+    Compare different models (ChatGPT-4, Claude) in a live chat interface.
+    """)
 
-    # Chatbot with messages format
-    chatbot = gr.Chatbot(type="messages", label="Chat History")
+    model_choice = gr.Radio(
+        choices=["openai", "claude"],
+        label="Select Model",
+        value="openai",
+        interactive=True
+    )
 
-    msg = gr.Textbox(placeholder="Ask a question...")
-    # On submit, call converse(...) with both the user message and entire history
-    msg.submit(fn=converse, inputs=[msg, chatbot], outputs=[msg, chatbot])
+    chatbot = gr.Chatbot(label="Chat History", type="messages")
+
+    with gr.Row():
+        msg = gr.Textbox(placeholder="Ask a question...", lines=1)
+        clear_btn = gr.Button("Clear History")
+
+    msg.submit(fn=converse, inputs=[msg, chatbot, model_choice], outputs=[msg, chatbot])
+    clear_btn.click(fn=clear_history, outputs=[chatbot])
 
 demo.launch()
