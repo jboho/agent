@@ -1,7 +1,7 @@
 # Using agents to run ChatGPT functions
 import warnings
 import gradio as gr
-# import anthropic
+import anthropic
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import (
@@ -68,7 +68,7 @@ agent_executor = AgentExecutor(
     memory=memory
 )
 
-
+# console way to do this:
 # while True:
 #     chat_query = input("What would you like to ask? ")
 #     response=agent_executor(chat_query)
@@ -76,53 +76,25 @@ agent_executor = AgentExecutor(
 #     print(response['output'])
 #     print("\n")
 
-
 def converse(user_input, history):
-    """
-    user_input: Latest message from user
-    history: List of (user_msg, bot_msg) tuples
-    """
-    # Run the agent against the user query
-    result = agent_executor.run(user_input)
-    # Add (user_input, result) to history so the chatbot can display it
-    history.append((user_input, result))
-    # Return a blank string for the input box, and updated history
+    # 1) Send user_input to the agent
+    agent_response = agent_executor.run(user_input)
+    
+    # 2) Append messages in the "role-content" format
+    history.append({"role": "user", "content": user_input})
+    history.append({"role": "assistant", "content": str(agent_response)})
+    
+    # 3) Return a blank string for the input box and the updated list of messages
     return "", history
-
 
 with gr.Blocks() as demo:
     gr.Markdown("## SQL + ChatGPT Agent")
 
-    # By specifying `type="messages"`, Gradio will use the message dictionary format
+    # Chatbot with messages format
     chatbot = gr.Chatbot(type="messages", label="Chat History")
 
-    # Textbox for user to submit queries
-    msg = gr.Textbox(
-        placeholder="Ask something about the SQL database..."
-    )
-
-    # Submitting text calls 'converse' and updates the Chatbot
-    msg.submit(
-        fn=converse,
-        inputs=[msg, chatbot],
-        outputs=[msg, chatbot]
-    )
+    msg = gr.Textbox(placeholder="Ask a question...")
+    # On submit, call converse(...) with both the user message and entire history
+    msg.submit(fn=converse, inputs=[msg, chatbot], outputs=[msg, chatbot])
 
 demo.launch()
-
-
-
-# # Build a Gradio UI with Blocks
-# with gr.Blocks() as demo:
-#     gr.Markdown("## SQL + ChatGPT Agent\nEnter your query below:")
-    
-#     chatbot = gr.Chatbot()  
-#     msg = gr.Textbox(placeholder="Ask about the SQL database here...")
-
-#     # Each time the user submits text, we run 'converse'
-#     # Inputs: the new message + the entire chat history
-#     # Outputs: reset the message box and update the chat history
-#     msg.submit(converse, inputs=[msg, chatbot], outputs=[msg, chatbot])
-
-# # Launch the Gradio app
-# demo.launch()
