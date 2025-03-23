@@ -25,3 +25,4 @@ class ChatModelStartHandler(BaseCallbackHandler):
                 boxen_print(message.content, title=message.type, color="purple")
             else:
                 boxen_print(message.content, title=message.type)
+            

@@ -1,8 +1,10 @@
+# File: ui/gradio_ui.py
 import gradio as gr
 from models.openai_model import OpenAIModel
 from models.claude_model import ClaudeModel
-from prompts.sql_prompts import get_sql_prompt
+from prompts.sql_prompts import build_sql_prompt
 from agents.sql_agent import SQLAgent
+from tools.sql import describe_tables, list_tables
 
 MODEL_REGISTRY = {
     "openai": OpenAIModel,
@@ -11,10 +13,9 @@ MODEL_REGISTRY = {
 
 AGENT = SQLAgent
 
-# Core chat logic using real agent and prompt
 def converse(user_input, history, model_choice):
     messages = [msg["content"] for msg in history if msg["role"] == "user"]
-    prompt = get_sql_prompt(user_input, messages)
+    prompt = build_sql_prompt(user_input, messages)
 
     model = MODEL_REGISTRY[model_choice]()
     agent = AGENT(model)
@@ -43,7 +44,7 @@ with gr.Blocks() as demo:
     chatbot = gr.Chatbot(label="Chat History", type="messages")
 
     with gr.Row():
-        msg = gr.Textbox(placeholder="Ask a question...", lines=1)
+        msg = gr.Textbox(placeholder="Ask a question...", lines=1, label="Query")
     with gr.Row():
         clear_btn = gr.Button("Clear History")
 
