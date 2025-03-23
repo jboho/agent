@@ -1,9 +1,8 @@
-# File: ui/gradio_ui.py
 import gradio as gr
 from models.openai_model import OpenAIModel
 from models.claude_model import ClaudeModel
 from prompts.sql_prompts import get_sql_prompt
-from tools.sql_agent import SQLAgent
+from agents.sql_agent import SQLAgent
 
 MODEL_REGISTRY = {
     "openai": OpenAIModel,
@@ -45,6 +44,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         msg = gr.Textbox(placeholder="Ask a question...", lines=1)
+    with gr.Row():
         clear_btn = gr.Button("Clear History")
 
     msg.submit(fn=converse, inputs=[msg, chatbot, model_choice], outputs=[msg, chatbot])

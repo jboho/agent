@@ -1,4 +1,3 @@
-# File: agents/mongo_agent.py
 from tools.mongo import MongoConnector
 
 class MongoAgent:
