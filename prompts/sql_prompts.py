@@ -17,5 +17,5 @@ chat_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="agent_scratchpad")
 ])
 
-def get_sql_prompt(input: str, history: list[Any]) -> dict:
-    return chat_prompt.format_messages(input=input, chat_history=history, agent_scratchpad=[])
+def get_sql_prompt() -> ChatPromptTemplate:
+    return chat_prompt
